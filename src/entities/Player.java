@@ -7,6 +7,7 @@ package entities;
 import Components.GamePanelComponent;
 import classes.KeyHandler;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
@@ -31,6 +32,7 @@ public class Player extends Entity{
     BufferedImage headImage = null;
     public static int cnt;
     public boolean directionChangedSuccessfully = false;
+    public boolean partRotatedSuccesfully;
 
     public Player(GamePanelComponent gp, KeyHandler keyH) {
         this.gp = gp;
@@ -45,7 +47,7 @@ public class Player extends Entity{
         y = 300;
         speed = 4;
         direction = "down";
-        bodyLength = 2;
+        bodyLength = 10;
         bodyParts = new ArrayList<>(Arrays.asList(downBody, downBody));
     }
     
@@ -171,11 +173,39 @@ public class Player extends Entity{
     }
     
     public void drawHead(Graphics2D g2){
+        switch(direction){
+            case "up":
+                g2.setFont(new Font("Joystix Monospace", Font.PLAIN, 25));
+                g2.setColor(Color.CYAN);
+                g2.drawString(Integer.toString(bodyLength), x + 45, y + 16);
+                break;
+            case "down":
+                g2.setFont(new Font("Joystix Monospace", Font.PLAIN, 25));
+                g2.setColor(Color.CYAN);
+                if(bodyLength > 9){
+                    g2.drawString(Integer.toString(bodyLength), x - 40, y + 48);
+                }
+                else{
+                    g2.drawString(Integer.toString(bodyLength), x - 20, y + 48);
+                }
+                break;
+            case "right":
+                g2.setFont(new Font("Joystix Monospace", Font.PLAIN, 25));
+                g2.setColor(Color.CYAN);
+                g2.drawString(Integer.toString(bodyLength), x, y - 2);
+                break;
+            case "left":
+                g2.setFont(new Font("Joystix Monospace", Font.PLAIN, 25));
+                g2.setColor(Color.CYAN);
+                g2.drawString(Integer.toString(bodyLength), x, y - 2);
+                break;
+        }
         g2.drawImage(headImage, x, y, gp.tileSize, gp.tileSize, null);
     }
     
     public void drawBody(Graphics2D g2){
         if(pointSwitchDirection != null){
+      /* KOD NA SKRĘCANIE POPRAWNE WĘŻA Z JEDNYM CZLONEM ZA GLOWA
             if(cnt <= gp.tileSize){
                 switch(prevDirection){
                     case "right":
@@ -209,11 +239,18 @@ public class Player extends Entity{
                         break;
 
                 }
-            }
+            } */
         }
         else{
             cnt = 0;
-            g2.drawImage(downBody, x, y - gp.tileSize, gp.tileSize, gp.tileSize, null);
+            for(int i = 1; i <= bodyLength; i++){
+                g2.drawImage(downBody, x, y - i * 48, gp.tileSize, gp.tileSize, null);
+            }
+        }      
+        
+        if(partRotatedSuccesfully){
+            cnt = 0;
+            partRotatedSuccesfully = false;
         }
     }
 }
