@@ -30,7 +30,7 @@ public class Player extends Entity{
     String prevDirection = "down";
     BufferedImage headImage = null;
     public static int cnt;
-    public static boolean directionChangedSuccessfully = false;
+    public boolean directionChangedSuccessfully = false;
 
     public Player(GamePanelComponent gp, KeyHandler keyH) {
         this.gp = gp;
@@ -43,7 +43,7 @@ public class Player extends Entity{
     public void initializePlayer(){
         x = 300;
         y = 300;
-        speed = 2;
+        speed = 4;
         direction = "down";
         bodyLength = 2;
         bodyParts = new ArrayList<>(Arrays.asList(downBody, downBody));

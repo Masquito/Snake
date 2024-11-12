@@ -5,14 +5,20 @@
 package Components;
 
 import classes.KeyHandler;
+import entities.Bug;
 import entities.Player;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import javax.swing.JPanel;
+import tile.TileManager;
 
 /**
  *
@@ -26,14 +32,13 @@ public class GamePanelComponent extends JPanel implements Runnable{
     public final int screenWidth = tileSize * maxScreenColumns;
     public final int screenHeight = tileSize * maxScreenRows;
     
+    TileManager tm = new TileManager(this);
     KeyHandler keyH = new KeyHandler(); 
     Thread gameThread;
     Player player = new Player(this, keyH);
-    
+    List<Bug> bugs = new ArrayList();
+    int bugSpawnCounter = 0;
     int FPS = 60;
-    int playerX = 100;
-    int playerY = 100;
-    int playerSpeed = 4;
     
     public GamePanelComponent(){
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
@@ -84,7 +89,21 @@ public class GamePanelComponent extends JPanel implements Runnable{
     public void paintComponent(Graphics g){
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
+        bugSpawnCounter++;
+        if(bugSpawnCounter >= 300){
+            bugs.add(new Bug(this));
+            bugSpawnCounter = 0;
+        }
+        tm.draw(g2);
+        for(int i = 0; i < bugs.size(); i++){
+            bugs.get(i).draw(g2);
+        }
         player.draw(g2);
+        for(int i = 0; i < bugs.size(); i++){
+            if(player.x >= bugs.get(i).x - 24 && player.x <= bugs.get(i).x + 24 && player.y >= bugs.get(i).y - 24 && player.y <= bugs.get(i).y + 24){
+                bugs.remove(i);
+            }
+        }
         g2.dispose();
     }
 }
