@@ -5,6 +5,7 @@
 package Components;
 
 import classes.KeyHandler;
+import entities.Player;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -19,14 +20,15 @@ import javax.swing.JPanel;
  */
 public class GamePanelComponent extends JPanel implements Runnable{
     
-    final int tileSize = 48; //48x48 tile
     final int maxScreenColumns = 28;
     final int maxScreenRows = 21;
+    public final int tileSize = 48; //48x48 tile
     public final int screenWidth = tileSize * maxScreenColumns;
     public final int screenHeight = tileSize * maxScreenRows;
     
     KeyHandler keyH = new KeyHandler(); 
     Thread gameThread;
+    Player player = new Player(this, keyH);
     
     int FPS = 60;
     int playerX = 100;
@@ -76,25 +78,13 @@ public class GamePanelComponent extends JPanel implements Runnable{
     }
     
     public void update(){
-        if(keyH.upPressed){
-            playerY -= playerSpeed;
-        }
-        else if(keyH.downPressed){
-            playerY += playerSpeed;
-        }
-        else if(keyH.leftPressed){
-            playerX -= playerSpeed;
-        }
-        else if(keyH.rightPressed){
-            playerX += playerSpeed;
-        }
+        player.update();
     }
     
     public void paintComponent(Graphics g){
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
-        g2.setColor(Color.white);
-        g2.fillRect(playerX, playerY, tileSize, tileSize);
+        player.draw(g2);
         g2.dispose();
     }
 }

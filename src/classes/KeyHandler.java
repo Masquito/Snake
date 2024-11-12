@@ -4,6 +4,7 @@
  */
 package classes;
 
+import entities.Player;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
@@ -14,50 +15,53 @@ import java.awt.event.KeyListener;
 public class KeyHandler implements KeyListener{
 
     public boolean upPressed, downPressed, leftPressed, rightPressed;
+    private int prevKey;
+    public int dirChanged = 1;
+    public int prevDir = 0;
+    
     @Override
     public void keyTyped(KeyEvent e) {
+        
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
-        int asciiKeyPressedCode = e.getKeyCode();
-        
-        if(asciiKeyPressedCode == KeyEvent.VK_W){
-            upPressed = true;
-        }
-        
-        if(asciiKeyPressedCode == KeyEvent.VK_S){
-            downPressed = true;
-        }
-        
-        if(asciiKeyPressedCode == KeyEvent.VK_A){
-            leftPressed = true;
-        }
-        
-        if(asciiKeyPressedCode == KeyEvent.VK_D){
-            rightPressed = true;
-        }
+
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
         int asciiKeyPressedCode = e.getKeyCode();
-        
         if(asciiKeyPressedCode == KeyEvent.VK_W){
-            upPressed = false;
+            upPressed = true;
+            downPressed = false;
+            leftPressed = false;
+            rightPressed = false;
         }
         
         if(asciiKeyPressedCode == KeyEvent.VK_S){
-            downPressed = false;
+            downPressed = true;
+            upPressed = false;
+            leftPressed = false;
+            rightPressed = false;
         }
         
         if(asciiKeyPressedCode == KeyEvent.VK_A){
-            leftPressed = false;
+            leftPressed = true;
+            upPressed = false;
+            downPressed = false;
+            rightPressed = false;
         }
         
         if(asciiKeyPressedCode == KeyEvent.VK_D){
-            rightPressed = false;
+            rightPressed = true;
+            upPressed = false;
+            downPressed = false;
+            leftPressed = false;
         }
+
+        
+        prevKey = e.getKeyCode();
     }
     
 }
