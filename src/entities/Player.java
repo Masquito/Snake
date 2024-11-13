@@ -33,6 +33,8 @@ public class Player extends Entity{
     public static int cnt;
     public boolean directionChangedSuccessfully = false;
     public boolean partRotatedSuccesfully;
+    private int frameCounter = 0;
+    private int rotatedCounter = 0;
 
     public Player(GamePanelComponent gp, KeyHandler keyH) {
         this.gp = gp;
@@ -205,52 +207,80 @@ public class Player extends Entity{
     
     public void drawBody(Graphics2D g2){
         if(pointSwitchDirection != null){
-      /* KOD NA SKRĘCANIE POPRAWNE WĘŻA Z JEDNYM CZLONEM ZA GLOWA
-            if(cnt <= gp.tileSize){
-                switch(prevDirection){
-                    case "right":
-                        g2.drawImage(rightBody, pointSwitchDirection.x - gp.tileSize + cnt + speed, pointSwitchDirection.y, gp.tileSize, gp.tileSize, null);
-                        break;
-                    case "left":
-                        g2.drawImage(leftBody, pointSwitchDirection.x + gp.tileSize - cnt - speed, pointSwitchDirection.y, gp.tileSize, gp.tileSize, null);
-                        break;
-                    case "up":
-                        g2.drawImage(upBody, pointSwitchDirection.x, pointSwitchDirection.y + gp.tileSize - cnt - speed, gp.tileSize, gp.tileSize, null);
-                        break;
-                    case "down":
-                        g2.drawImage(downBody, pointSwitchDirection.x, pointSwitchDirection.y - gp.tileSize + cnt + speed, gp.tileSize, gp.tileSize, null);
-                        break;
+            if(cnt <= gp.tileSize * bodyLength){
+                for(int i = 1; i <= bodyLength; i++){
+                    switch(prevDirection){
+                        //Rysowanie członów węża podczas skrętu w starym kierunku
+                        case "right":
+                            if((pointSwitchDirection.x - gp.tileSize * i + cnt + speed) < pointSwitchDirection.x){
+                                g2.drawImage(rightBody, pointSwitchDirection.x - gp.tileSize * i + cnt + speed, pointSwitchDirection.y, gp.tileSize, gp.tileSize, null);
+                            }
+                            break;
+                        case "left":
+                            if((pointSwitchDirection.x + gp.tileSize * i - cnt - speed) > pointSwitchDirection.x){
+                                g2.drawImage(leftBody, pointSwitchDirection.x + gp.tileSize * i - cnt - speed, pointSwitchDirection.y, gp.tileSize, gp.tileSize, null);
+                            }
+                            break;
+                        case "up":
+                            if((pointSwitchDirection.y + gp.tileSize * i - cnt - speed) > pointSwitchDirection.y){
+                                g2.drawImage(upBody, pointSwitchDirection.x, pointSwitchDirection.y + gp.tileSize * i - cnt - speed, gp.tileSize, gp.tileSize, null);
+                            }
+                            break;
+                        case "down":
+                            if((pointSwitchDirection.y - gp.tileSize * i + cnt + speed) < pointSwitchDirection.y){
+                                g2.drawImage(downBody, pointSwitchDirection.x, pointSwitchDirection.y - gp.tileSize * i + cnt + speed, gp.tileSize, gp.tileSize, null);
+                            }
+                            break;
+                    }
                 }
                 cnt += speed;
+                if(cnt % gp.tileSize == 0){
+                    rotatedCounter++;
+                }
+                for(int i = 1; i <= rotatedCounter; i++){
+                    System.out.println(i);
+                        drawRecursive(i, g2);
+                }
             }
             else{
-                switch(direction){
-                    case "right":
-                        g2.drawImage(rightBody, x - gp.tileSize, pointSwitchDirection.y, gp.tileSize, gp.tileSize, null);
-                        break;
-                    case "left":
-                        g2.drawImage(leftBody, x + gp.tileSize, pointSwitchDirection.y, gp.tileSize, gp.tileSize, null);
-                        break;
-                    case "up":
-                        g2.drawImage(upBody, pointSwitchDirection.x, y + gp.tileSize, gp.tileSize, gp.tileSize, null); 
-                        break;
-                    case "down":
-                        g2.drawImage(downBody, pointSwitchDirection.x, y - gp.tileSize, gp.tileSize, gp.tileSize, null);
-                        break;
-
+                rotatedCounter = 0;
+                for(int i = 1; i <= bodyLength; i++){
+                
                 }
-            } */
+            }
         }
         else{
-            cnt = 0;
+            //Pierwsze rysowanie węża przed pierwszym skrętem
             for(int i = 1; i <= bodyLength; i++){
                 g2.drawImage(downBody, x, y - i * 48, gp.tileSize, gp.tileSize, null);
             }
         }      
-        
-        if(partRotatedSuccesfully){
-            cnt = 0;
-            partRotatedSuccesfully = false;
+    }
+    
+    public int drawRecursive(int bodylen, Graphics2D g2){
+        for(int i = 0; i < bodylen; i++){
+            switch(direction){
+                //Rysowanie węża całkowicie w nowym kierunku na prosto
+                case "right":
+                    g2.drawImage(rightBody, x - gp.tileSize * i - gp.tileSize, pointSwitchDirection.y, gp.tileSize, gp.tileSize, null);
+                    break;
+                case "left":
+                    g2.drawImage(leftBody, x + gp.tileSize * i + gp.tileSize, pointSwitchDirection.y, gp.tileSize, gp.tileSize, null);
+                    break;
+                case "up":
+                    g2.drawImage(upBody, pointSwitchDirection.x, y + gp.tileSize * i + gp.tileSize, gp.tileSize, gp.tileSize, null); 
+                    break;
+                case "down":
+                    g2.drawImage(downBody, pointSwitchDirection.x, y - gp.tileSize * i - gp.tileSize, gp.tileSize, gp.tileSize, null);
+                    break;
+
+            }
+        }
+        if(bodylen == 0){
+            return 0;
+        }
+        else{
+            return drawRecursive(bodylen - 1, g2);
         }
     }
 }
