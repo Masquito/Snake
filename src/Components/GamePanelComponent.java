@@ -5,6 +5,7 @@
 package Components;
 
 import classes.KeyHandler;
+import classes.PlayerBodyPart;
 import entities.Bug;
 import entities.Player;
 import java.awt.Color;
@@ -102,7 +103,7 @@ public class GamePanelComponent extends JPanel implements Runnable{
         for(int i = 0; i < bugs.size(); i++){
             if(player.x >= bugs.get(i).x - 24 && player.x <= bugs.get(i).x + 24 && player.y >= bugs.get(i).y - 24 && player.y <= bugs.get(i).y + 24){
                 bugs.remove(i);
-                player.bodyLength++;
+                player.bodyParts.add(new PlayerBodyPart());
             }
         }
         g2.dispose();

@@ -6,6 +6,8 @@ package entities;
 
 import Components.GamePanelComponent;
 import classes.KeyHandler;
+import classes.PlayerBodyPart;
+import classes.SwitchDirectionPoint;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
@@ -26,16 +28,12 @@ public class Player extends Entity{
     
     GamePanelComponent gp;
     KeyHandler keyH;
-    public int bodyLength;
-    List<BufferedImage> bodyParts;
-    public ArrayList<Point> switchPoints = new ArrayList<>(); 
+    public ArrayList<SwitchDirectionPoint> directionSwitchPoints = new ArrayList<>(); 
+    public ArrayList<PlayerBodyPart> bodyParts = new ArrayList<>();
     String prevDirection = "down";
     BufferedImage headImage = null;
-    public static int cnt;
     public boolean directionChangedSuccessfully = false;
-    public boolean partRotatedSuccesfully;
-    private int frameCounter = 0;
-    private int rotatedCounter = 0;
+    int cnt = 0;
 
     public Player(GamePanelComponent gp, KeyHandler keyH) {
         this.gp = gp;
@@ -43,6 +41,7 @@ public class Player extends Entity{
         
         getPlayerImage();
         initializePlayer();
+        initializeBodyParts();
     }
     
     public void initializePlayer(){
@@ -50,8 +49,6 @@ public class Player extends Entity{
         y = 300;
         speed = 4;
         direction = "down";
-        bodyLength = 5;
-        bodyParts = new ArrayList<>(Arrays.asList(downBody, downBody));
     }
     
     public void getPlayerImage(){
@@ -70,12 +67,23 @@ public class Player extends Entity{
         }
     }
     
+    public void initializeBodyParts(){
+        for(int i = 0; i < 5; i++){
+            bodyParts.add(new PlayerBodyPart());
+        }
+        for(int i = 0; i < 5; i++){
+            bodyParts.get(i).direction = "down";
+            bodyParts.get(i).x = x;
+            bodyParts.get(i).y = y - gp.tileSize * i;
+        }
+    }
+    
     public void update(){
         if(keyH.upPressed){
             if(direction != "down"){   
                 if(direction != "up"){
                     directionChangedSuccessfully = true; 
-                    switchPoints.add(new Point(x, y));
+                    directionSwitchPoints.add(new SwitchDirectionPoint(x, y, direction, "up", false));
                 }
                 prevDirection = direction;
                 direction = "up";
@@ -86,7 +94,7 @@ public class Player extends Entity{
             if(direction != "up"){ 
                 if(direction != "down"){
                     directionChangedSuccessfully = true;  
-                    switchPoints.add(new Point(x, y));
+                    directionSwitchPoints.add(new SwitchDirectionPoint(x, y, direction, "down", false));
                 }
                 prevDirection = direction;
                 direction = "down";
@@ -97,7 +105,7 @@ public class Player extends Entity{
             if(direction != "right"){
                 if(direction != "left"){
                     directionChangedSuccessfully = true;   
-                    switchPoints.add(new Point(x, y));
+                    directionSwitchPoints.add(new SwitchDirectionPoint(x, y, direction, "left", false));
                 }
                 prevDirection = direction;
                 direction = "left";
@@ -108,7 +116,7 @@ public class Player extends Entity{
             if(direction != "left"){
                 if(direction != "right"){
                     directionChangedSuccessfully = true; 
-                    switchPoints.add(new Point(x, y));
+                    directionSwitchPoints.add(new SwitchDirectionPoint(x, y, direction, "right", false));
                 }
                 prevDirection = direction;
                 direction = "right";
@@ -131,10 +139,6 @@ public class Player extends Entity{
                 break;
         }
         
-        if(directionChangedSuccessfully){
-            cnt = 0;
-            directionChangedSuccessfully = false;
-        }
     }
     
     public void draw(Graphics2D g2){
@@ -142,31 +146,15 @@ public class Player extends Entity{
         switch(direction){
             case "up":
                 headImage = upHead;
-                bodyParts.clear();
-                for(int i = 0; i < bodyLength; i++){
-                    bodyParts.add(upBody);
-                }
                 break;
             case "down":
                 headImage = downHead;
-                bodyParts.clear();
-                for(int i = 0; i < bodyLength; i++){
-                    bodyParts.add(downBody);
-                }
                 break;
             case "left":
                 headImage = leftHead;
-                bodyParts.clear();
-                for(int i = 0; i < bodyLength; i++){
-                    bodyParts.add(leftBody);
-                }
                 break;
             case "right":
                 headImage = rightHead;
-                bodyParts.clear();
-                for(int i = 0; i < bodyLength; i++){
-                    bodyParts.add(rightBody);
-                }
                 break;
         }
         
@@ -180,130 +168,153 @@ public class Player extends Entity{
             case "up":
                 g2.setFont(new Font("Joystix Monospace", Font.PLAIN, 25));
                 g2.setColor(Color.CYAN);
-                g2.drawString(Integer.toString(bodyLength), x + 45, y + 16);
+                g2.drawString(Integer.toString(bodyParts.size()), x + 45, y + 16);
                 break;
             case "down":
                 g2.setFont(new Font("Joystix Monospace", Font.PLAIN, 25));
                 g2.setColor(Color.CYAN);
-                if(bodyLength > 9){
-                    g2.drawString(Integer.toString(bodyLength), x - 40, y + 48);
+                if(bodyParts.size() > 9){
+                    g2.drawString(Integer.toString(bodyParts.size()), x - 40, y + 48);
                 }
                 else{
-                    g2.drawString(Integer.toString(bodyLength), x - 20, y + 48);
+                    g2.drawString(Integer.toString(bodyParts.size()), x - 20, y + 48);
                 }
                 break;
             case "right":
                 g2.setFont(new Font("Joystix Monospace", Font.PLAIN, 25));
                 g2.setColor(Color.CYAN);
-                g2.drawString(Integer.toString(bodyLength), x, y - 2);
+                g2.drawString(Integer.toString(bodyParts.size()), x, y - 2);
                 break;
             case "left":
                 g2.setFont(new Font("Joystix Monospace", Font.PLAIN, 25));
                 g2.setColor(Color.CYAN);
-                g2.drawString(Integer.toString(bodyLength), x, y - 2);
+                g2.drawString(Integer.toString(bodyParts.size()), x, y - 2);
                 break;
         }
         g2.drawImage(headImage, x, y, gp.tileSize, gp.tileSize, null);
     }
     
     public void drawBody(Graphics2D g2){
-        if(pointSwitchDirection != null){
-            DrawBodyAfterFirstDirectionChange(g2);
-        }
-        else{
-            //Pierwsze rysowanie węża przed pierwszym skrętem
-            for(int i = 1; i <= bodyLength; i++){
-                g2.drawImage(downBody, x, y - i * 48, gp.tileSize, gp.tileSize, null);
-            }
-        }       
-    }
-    
-    public int RecursiveNewDirectionSnakeDrawing(int bodylen, Graphics2D g2){
-        for(int i = 0; i < bodylen; i++){
-            switch(direction){
-                //Rysowanie węża całkowicie w nowym kierunku na prosto podczas skrętu
-                case "right":
-                    g2.drawImage(rightBody, x - gp.tileSize * i - gp.tileSize, pointSwitchDirection.y, gp.tileSize, gp.tileSize, null);
-                    break;
-                case "left":
-                    g2.drawImage(leftBody, x + gp.tileSize * i + gp.tileSize, pointSwitchDirection.y, gp.tileSize, gp.tileSize, null);
-                    break;
-                case "up":
-                    g2.drawImage(upBody, pointSwitchDirection.x, y + gp.tileSize * i + gp.tileSize, gp.tileSize, gp.tileSize, null); 
-                    break;
-                case "down":
-                    g2.drawImage(downBody, pointSwitchDirection.x, y - gp.tileSize * i - gp.tileSize, gp.tileSize, gp.tileSize, null);
-                    break;
+        //Podejście "zmierzaj ciałem do najbliższego switchPointa, a jeżeli wszystkie są już done to do głowy"
 
+        //Sprawdzenie czy wszystkie switchPointy zostały obsłużone, jeżeli tak to podążaj za głową
+        boolean followhead = true;
+        for(int i = 0; i < directionSwitchPoints.size(); i++){
+            if(!directionSwitchPoints.get(i).done){
+                followhead = false;
+                break;
             }
+            followhead = true;
         }
-        if(bodylen == 0){
-            return 0;
-        }
-        else{
-            return RecursiveNewDirectionSnakeDrawing(bodylen - 1, g2);
-        }
-    }
-    
-    public void DrawBodyAfterFirstDirectionChange(Graphics2D g2){
-        if(cnt <= gp.tileSize * bodyLength){
-            for(int i = 1; i <= bodyLength; i++){
-                switch(prevDirection){
-                    //Rysowanie członów węża podczas skrętu w starym kierunku
-                    case "right":
-                        if((pointSwitchDirection.x - gp.tileSize * i + cnt + speed) < pointSwitchDirection.x){
-                            g2.drawImage(rightBody, pointSwitchDirection.x - gp.tileSize * i + cnt + speed, pointSwitchDirection.y, gp.tileSize, gp.tileSize, null);
-                        }
-                        break;
-                    case "left":
-                        if((pointSwitchDirection.x + gp.tileSize * i - cnt - speed) > pointSwitchDirection.x){
-                            g2.drawImage(leftBody, pointSwitchDirection.x + gp.tileSize * i - cnt - speed, pointSwitchDirection.y, gp.tileSize, gp.tileSize, null);
-                        }
-                        break;
-                    case "up":
-                        if((pointSwitchDirection.y + gp.tileSize * i - cnt - speed) > pointSwitchDirection.y){
-                            g2.drawImage(upBody, pointSwitchDirection.x, pointSwitchDirection.y + gp.tileSize * i - cnt - speed, gp.tileSize, gp.tileSize, null);
-                        }
-                        break;
-                    case "down":
-                        if((pointSwitchDirection.y - gp.tileSize * i + cnt + speed) < pointSwitchDirection.y){
-                            g2.drawImage(downBody, pointSwitchDirection.x, pointSwitchDirection.y - gp.tileSize * i + cnt + speed, gp.tileSize, gp.tileSize, null);
-                        }
-                        break;
-                }
-            }
-            cnt += speed;
-            if(cnt % gp.tileSize == 0){
-                rotatedCounter++;
-            }
-            
-            for(int i = 1; i <= rotatedCounter; i++){
-                RecursiveNewDirectionSnakeDrawing(i, g2);
-            }
-            
-        }
-        else{
-            rotatedCounter = 0;
-            for(int i = 0; i < bodyLength; i++){
+        
+        if(followhead){
+            for(int i = 0; i < bodyParts.size() - 1; i++){
                 switch(direction){
-                    //Rysowanie węża całkowicie w nowym kierunku na prosto
-                    case "right":
-                        g2.drawImage(rightBody, x - gp.tileSize * i - gp.tileSize, pointSwitchDirection.y, gp.tileSize, gp.tileSize, null);
-                        break;
-                    case "left":
-                        g2.drawImage(leftBody, x + gp.tileSize * i + gp.tileSize, pointSwitchDirection.y, gp.tileSize, gp.tileSize, null);
+                    case "down":
+                        g2.drawImage(bodyParts.get(i).downImage, bodyParts.get(i).x, bodyParts.get(i).y, gp.tileSize, gp.tileSize, null);
+                        if(i != 0){
+                            bodyParts.get(i + 1).x = bodyParts.get(i).x;
+                            bodyParts.get(i + 1).y = bodyParts.get(i).y - gp.tileSize; 
+                        }  
+                        else{
+                            bodyParts.get(i).x = x;
+                            bodyParts.get(i).y = y - gp.tileSize + speed;
+                            bodyParts.get(i + 1).x = bodyParts.get(i).x;
+                            bodyParts.get(i + 1).y = bodyParts.get(i).y - gp.tileSize; 
+                        }
                         break;
                     case "up":
-                        g2.drawImage(upBody, pointSwitchDirection.x, y + gp.tileSize * i + gp.tileSize, gp.tileSize, gp.tileSize, null); 
+                        g2.drawImage(bodyParts.get(i).upImage, bodyParts.get(i).x, bodyParts.get(i).y, gp.tileSize, gp.tileSize, null);
+                        if(i != 0){
+                            bodyParts.get(i + 1).x = bodyParts.get(i).x;
+                            bodyParts.get(i + 1).y = bodyParts.get(i).y + gp.tileSize; 
+                        }  
+                        else{
+                            bodyParts.get(i).x = x;
+                            bodyParts.get(i).y = y + gp.tileSize - speed;
+                            bodyParts.get(i + 1).x = bodyParts.get(i).x;
+                            bodyParts.get(i + 1).y = bodyParts.get(i).y + gp.tileSize; 
+                        }
                         break;
-                    case "down":
-                        g2.drawImage(downBody, pointSwitchDirection.x, y - gp.tileSize * i - gp.tileSize, gp.tileSize, gp.tileSize, null);
+                    case "left":
+                        g2.drawImage(bodyParts.get(i).leftImage, bodyParts.get(i).x, bodyParts.get(i).y, gp.tileSize, gp.tileSize, null);
+                        if(i != 0){
+                            bodyParts.get(i + 1).x = bodyParts.get(i).x + gp.tileSize;
+                            bodyParts.get(i + 1).y = bodyParts.get(i).y; 
+                        }  
+                        else{
+                            bodyParts.get(i).x = x + gp.tileSize - speed;
+                            bodyParts.get(i).y = y;
+                            bodyParts.get(i + 1).x = bodyParts.get(i).x + gp.tileSize;
+                            bodyParts.get(i + 1).y = bodyParts.get(i).y; 
+                        }
                         break;
-
+                    case "right":
+                        g2.drawImage(bodyParts.get(i).rightImage, bodyParts.get(i).x, bodyParts.get(i).y, gp.tileSize, gp.tileSize, null);
+                        if(i != 0){
+                            bodyParts.get(i + 1).x = bodyParts.get(i).x - gp.tileSize;
+                            bodyParts.get(i + 1).y = bodyParts.get(i).y; 
+                        }  
+                        else{
+                            bodyParts.get(i).x = x - gp.tileSize + speed;
+                            bodyParts.get(i).y = y;
+                            bodyParts.get(i + 1).x = bodyParts.get(i).x - gp.tileSize;
+                            bodyParts.get(i + 1).y = bodyParts.get(i).y; 
+                        }
+                        break;
                 }
             }
         }
+        else{
+            if(cnt <= gp.tileSize * bodyParts.size()){
+                for(int i = 0; i < directionSwitchPoints.size(); i++){
+                    for(int part = 0; part < bodyParts.size(); part++){                       
+                        if(bodyParts.get(part).x == directionSwitchPoints.get(i).x && bodyParts.get(part).y == directionSwitchPoints.get(i).y){
+                            bodyParts.get(part).direction = directionSwitchPoints.get(i).newDirection;
+                        }
+                        else{                           
+                            switch(bodyParts.get(part).direction){
+                                case "down":
+                                    bodyParts.get(part).y += speed;
+                                    break;
+                                case "up":
+                                    bodyParts.get(part).y -= speed;
+                                    break;
+                                case "left":
+                                    bodyParts.get(part).x -= speed;
+                                    break;
+                                case "right":
+                                    bodyParts.get(part).x += speed;
+                                    break;
+                            }
+                            
+                        }
+
+                    }
+                }
+                cnt += speed;
+                
+                for(int i = 0; i < bodyParts.size() - 1; i++){
+                    switch(bodyParts.get(i).direction){
+                        case "down":
+                            g2.drawImage(bodyParts.get(i).downImage, bodyParts.get(i).x, bodyParts.get(i).y, gp.tileSize, gp.tileSize, null);
+                            break;
+                        case "up":
+                            g2.drawImage(bodyParts.get(i).upImage, bodyParts.get(i).x, bodyParts.get(i).y, gp.tileSize, gp.tileSize, null);
+                            break;
+                        case "left":
+                             g2.drawImage(bodyParts.get(i).leftImage, bodyParts.get(i).x, bodyParts.get(i).y, gp.tileSize, gp.tileSize, null);
+                             break;
+                        case "right":
+                             g2.drawImage(bodyParts.get(i).rightImage, bodyParts.get(i).x, bodyParts.get(i).y, gp.tileSize, gp.tileSize, null);
+                             break;
+                    }
+                }
+            }
+            else{
+                directionSwitchPoints.get(0).done = true;
+                followhead = true;
+            }
+        }
     }
-    
-    
 }
