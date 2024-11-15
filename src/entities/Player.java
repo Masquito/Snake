@@ -12,6 +12,8 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,6 +36,7 @@ public class Player extends Entity{
     BufferedImage headImage = null;
     public boolean directionChangedSuccessfully = false;
     int cnt = 0;
+    public boolean colision = false;
 
     public Player(GamePanelComponent gp, KeyHandler keyH) {
         this.gp = gp;
@@ -106,12 +109,48 @@ public class Player extends Entity{
     }
     
     public void update(){
+        Line2D snakeNose = new Line2D.Double();
+                
+        int minx = bodyParts.get(bodyParts.size() - 1).x;
+        int maxx = bodyParts.get(0).x;
+        int miny = bodyParts.get(bodyParts.size() - 1).y;
+        int maxy = bodyParts.get(0).y;
         
         switch(direction){
-            case "up" -> y -= speed;
-            case "down" -> y += speed;
-            case "left" -> x -= speed;
-            case "right" -> x += speed;
+            case "up" -> {
+                y -= speed;
+                snakeNose = new Line2D.Double(new Point(x, y), new Point(x + gp.tileSize, y));
+            }
+            case "down" -> {
+                y += speed;
+                snakeNose = new Line2D.Double(new Point(x, y + gp.tileSize), new Point(x + gp.tileSize, y + gp.tileSize));
+            }
+            case "left" -> {
+                x -= speed;
+                snakeNose = new Line2D.Double(new Point(x, y), new Point(x, y + gp.tileSize));
+            }
+            case "right" -> {
+                x += speed;
+                snakeNose = new Line2D.Double(new Point(x + gp.tileSize, y), new Point(x + gp.tileSize, y + gp.tileSize));
+            }
+        }
+        
+        for(int i = 0; i < bodyParts.size(); i++){
+            Line2D topEdge = new Line2D.Double(
+                    new Point(bodyParts.get(i).x, bodyParts.get(i).y), new Point(bodyParts.get(i).x + gp.tileSize, bodyParts.get(i).y));
+            Line2D bottomEdge = new Line2D.Double(
+                    new Point(bodyParts.get(i).x, bodyParts.get(i).y + gp.tileSize), new Point(bodyParts.get(i).x + gp.tileSize, bodyParts.get(i).y + gp.tileSize));
+            Line2D leftEdge = new Line2D.Double(
+                    new Point(bodyParts.get(i).x, bodyParts.get(i).y), new Point(bodyParts.get(i).x, bodyParts.get(i).y + gp.tileSize));
+            Line2D rightEdge = new Line2D.Double(
+                    new Point(bodyParts.get(i).x + gp.tileSize, bodyParts.get(i).y), new Point(bodyParts.get(i).x + gp.tileSize, bodyParts.get(i).y + gp.tileSize));
+            
+            
+            
+            if(snakeNose.intersectsLine(topEdge) || snakeNose.intersectsLine(bottomEdge) || snakeNose.intersectsLine(leftEdge) || snakeNose.intersectsLine(rightEdge)){
+               colision = true; 
+               break;
+            }
         }
         
         if(keyH.upPressed){
@@ -207,7 +246,21 @@ public class Player extends Entity{
                 g2.drawString(Integer.toString(bodyParts.size()), x, y - 2);
             }
         }
+        
+        if(y <= 0){
+            y = gp.screenHeight;
+        }
+        else if(y >= gp.screenHeight){
+            y = 0;
+        }
+        else if(x <= 0){
+            x = gp.screenWidth;
+        }
+        else if(x >= gp.screenWidth){
+            x = 0;
+        }
         g2.drawImage(headImage, x, y, gp.tileSize, gp.tileSize, null);
+
     }
     
     public void drawBody(Graphics2D g2){

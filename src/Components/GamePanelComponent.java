@@ -10,6 +10,7 @@ import entities.Bug;
 import entities.Player;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.io.IOException;
@@ -32,6 +33,10 @@ public class GamePanelComponent extends JPanel implements Runnable{
     public final int tileSize = 48; //48x48 tile
     public final int screenWidth = tileSize * maxScreenColumns;
     public final int screenHeight = tileSize * maxScreenRows;
+    
+    public final int playState = 0;
+    public final int gameOverState = 1;
+    public int gameState = 0;
     
     TileManager tm = new TileManager(this);
     KeyHandler keyH = new KeyHandler(); 
@@ -90,22 +95,30 @@ public class GamePanelComponent extends JPanel implements Runnable{
     public void paintComponent(Graphics g){
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
-        bugSpawnCounter++;
-        if(bugSpawnCounter >= 300){
-            bugs.add(new Bug(this));
-            bugSpawnCounter = 0;
-        }
-        tm.draw(g2);
-        for(int i = 0; i < bugs.size(); i++){
-            bugs.get(i).draw(g2);
-        }
-        player.draw(g2);
-        for(int i = 0; i < bugs.size(); i++){
-            if(player.x >= bugs.get(i).x - 24 && player.x <= bugs.get(i).x + 24 && player.y >= bugs.get(i).y - 24 && player.y <= bugs.get(i).y + 24){
-                bugs.remove(i);
-                player.AddPlayerBodyPart();
+        
+        if(!player.colision){
+            bugSpawnCounter++;
+            if(bugSpawnCounter >= 300){
+                bugs.add(new Bug(this));
+                bugSpawnCounter = 0;
             }
+            tm.draw(g2);
+            for(int i = 0; i < bugs.size(); i++){
+                bugs.get(i).draw(g2);
+            }
+            player.draw(g2);
+            for(int i = 0; i < bugs.size(); i++){
+                if(player.x >= bugs.get(i).x - 24 && player.x <= bugs.get(i).x + 24 && player.y >= bugs.get(i).y - 24 && player.y <= bugs.get(i).y + 24){
+                    bugs.remove(i);
+                    player.AddPlayerBodyPart();
+                }
+            }
+            g2.dispose();
         }
-        g2.dispose();
+        else{
+            g2.setFont(new Font("Joystix Monospace", Font.PLAIN, 120));
+            g2.setColor(Color.red);
+            g2.drawString("Game Over", 200, 400);
+        }
     }
 }
