@@ -6,6 +6,7 @@ package Components;
 
 import classes.KeyHandler;
 import classes.PlayerBodyPart;
+import classes.Sound;
 import entities.Bug;
 import entities.Player;
 import java.awt.Color;
@@ -41,6 +42,7 @@ public class GamePanelComponent extends JPanel implements Runnable{
     TileManager tm = new TileManager(this);
     KeyHandler keyH = new KeyHandler(); 
     Thread gameThread;
+    Sound sound = new Sound();
     Player player = new Player(this, keyH);
     List<Bug> bugs = new ArrayList();
     int bugSpawnCounter = 0;
@@ -108,9 +110,11 @@ public class GamePanelComponent extends JPanel implements Runnable{
             }
             player.draw(g2);
             for(int i = 0; i < bugs.size(); i++){
-                if(player.x >= bugs.get(i).x - 24 && player.x <= bugs.get(i).x + 24 && player.y >= bugs.get(i).y - 24 && player.y <= bugs.get(i).y + 24){
+                if(player.x >= bugs.get(i).x - 36 && player.x <= bugs.get(i).x + 36 && player.y >= bugs.get(i).y - 36 && player.y <= bugs.get(i).y + 36){
                     bugs.remove(i);
                     player.AddPlayerBodyPart();
+                    sound.setSound(1);
+                    sound.play();
                 }
             }
             g2.dispose();

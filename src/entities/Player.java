@@ -7,6 +7,7 @@ package entities;
 import Components.GamePanelComponent;
 import classes.KeyHandler;
 import classes.PlayerBodyPart;
+import classes.Sound;
 import classes.SwitchDirectionPoint;
 import java.awt.Color;
 import java.awt.Font;
@@ -34,6 +35,7 @@ public class Player extends Entity{
     public ArrayList<PlayerBodyPart> bodyParts = new ArrayList<>();
     String prevDirection = "down";
     BufferedImage headImage = null;
+    Sound sound = new Sound();
     public boolean directionChangedSuccessfully = false;
     int cnt = 0;
     public boolean colision = false;
@@ -45,6 +47,8 @@ public class Player extends Entity{
         getPlayerImage();
         initializePlayer();
         initializeBodyParts();
+        
+        PlayMusic();
     }
     
     public void initializePlayer(){
@@ -149,6 +153,9 @@ public class Player extends Entity{
             
             if(snakeNose.intersectsLine(topEdge) || snakeNose.intersectsLine(bottomEdge) || snakeNose.intersectsLine(leftEdge) || snakeNose.intersectsLine(rightEdge)){
                colision = true; 
+               StopMusic();
+               sound.setSound(2);
+               sound.play();
                break;
             }
         }
@@ -339,6 +346,10 @@ public class Player extends Entity{
                 System.out.println("cnt: " + cnt);
                 boolean oneTime = true;
                 for(int i = 0; i < directionSwitchPoints.size(); i++){
+                    if((directionSwitchPoints.get(i).x == bodyParts.get(bodyParts.size() - 1).x) 
+                        && (directionSwitchPoints.get(i).y == bodyParts.get(bodyParts.size() - 1).y)){
+                           directionSwitchPoints.remove(i);
+                    }
                     for(int j = 0; j < bodyParts.size(); j++){ 
                         if(oneTime){
                             switch(bodyParts.get(j).direction){
@@ -354,10 +365,6 @@ public class Player extends Entity{
                         }
                     }
                     oneTime = false;
-                    if((directionSwitchPoints.get(i).x == bodyParts.get(bodyParts.size() - 1).x) 
-                        && (directionSwitchPoints.get(i).y == bodyParts.get(bodyParts.size() - 1).y)){
-                           directionSwitchPoints.remove(i);
-                    }
                 }
                 cnt += speed;
                 for(int i = 0; i < bodyParts.size(); i++){
@@ -370,5 +377,15 @@ public class Player extends Entity{
                 }
             }
         }
+    }
+    
+    public void PlayMusic(){
+        sound.setSound(0);
+        sound.play();
+        sound.loop();
+    }
+    
+    public void StopMusic(){
+        sound.stop();
     }
 }
